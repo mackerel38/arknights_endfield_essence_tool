@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アークナイツ：エンドフィールド 基質厳選ツール</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: #FFFF00;
+            color: black;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .tab-button:hover {
+            background: #e0e0e0;
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .weapon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .weapon-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fafafa;
+            transition: all 0.3s;
+        }
+
+        .weapon-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .weapon-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .weapon-name {
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .weapon-type {
+            background: #FFFF00;
+            color: black;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .weapon-effects {
+            margin: 10px 0;
+        }
+
+        .effect-row {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        .effect-label {
+            font-weight: bold;
+            width: 80px;
+            color: #666;
+        }
+
+        .effect-value {
+            color: #333;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .status-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .status-btn {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .status-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .status-btn.not-obtained {
+            border-color: #ccc;
+            color: #999;
+        }
+
+        .status-btn.farming {
+            border-color: #ffa726;
+            background: #fff3e0;
+            color: #f57c00;
+            font-weight: bold;
+        }
+
+        .status-btn.obtained {
+            border-color: #66bb6a;
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .status-btn.active {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .area-section {
+            margin-bottom: 30px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .area-header {
+            background: #FFFF00;
+            color: black;
+            padding: 15px 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .area-content {
+            padding: 20px;
+            background: #fafafa;
+        }
+
+        .substrate-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .substrate-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 12px;
+            transition: all 0.3s;
+        }
+
+        .substrate-item:hover {
+            border-color: #FFFF00;
+            box-shadow: 0 2px 8px rgba(255, 255, 0, 0.3);
+        }
+
+        .substrate-weapon {
+            font-weight: bold;
+            color: #FFFF00;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .substrate-effects {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .no-substrates {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .data-table th {
+            background: #FFFF00;
+            color: black;
+            font-weight: bold;
+        }
+
+        .data-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .effect-badge {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 2px;
+            font-size: 12px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #FFFF00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>アークナイツ：エンドフィールド</h1>
+            <p>基質厳選ツール</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('possession')">所持基質</button>
+            <button class="tab-button" onclick="switchTab('farming')">基質厳選</button>
+            <button class="tab-button" onclick="switchTab('weapons')">武器データ</button>
+            <button class="tab-button" onclick="switchTab('drops')">ドロップデータ</button>
+        </div>
+
+        <div id="possession" class="tab-content active">
+            <h2>所持基質管理</h2>
+            <input type="text" class="search-box" id="searchWeapon" placeholder="武器名で検索..." onkeyup="filterWeapons()">
+            <div class="weapon-grid" id="weaponGrid"></div>
+        </div>
+
+        <div id="farming" class="tab-content">
+            <h2>基質厳選</h2>
+            <p style="margin-bottom: 20px; color: #666;">「厳選中」に設定した基質を各エリア別に表示します。</p>
+            <div id="farmingAreas"></div>
+        </div>
+
+        <div id="weapons" class="tab-content">
+            <h2>武器データ</h2>
+            <table class="data-table" id="weaponTable"></table>
+        </div>
+
+        <div id="drops" class="tab-content">
+            <h2>ドロップデータ</h2>
+            <div id="dropData"></div>
+        </div>
+    </div>
+
+    <script>
+        // 武器データ
+        const weaponData = [
+            { type: "片手剣", name: "フレイムフォージ", base: "知性", add: "攻撃力", skill: "夜幕" },
+            { type: "片手剣", name: "大願", base: "敏捷", add: "攻撃力", skill: "付術" },
+            { type: "片手剣", name: "不知帰", base: "意志", add: "攻撃力", skill: "流回" },
+            { type: "片手剣", name: "テルミット・カッター", base: "意志", add: "攻撃力", skill: "流回" },
+            { type: "片手剣", name: "ダークトーチ", base: "知性", add: "灼熱ダメージ", skill: "付術" },
+            { type: "片手剣", name: "フーヤオ", base: "メイン能力", add: "会心率", skill: "夜幕" },
+            { type: "片手剣", name: "輝かしき名声", base: "メイン能力", add: "物理ダメージ", skill: "残虐" },
+            { type: "片手剣", name: "白夜新星", base: "メイン能力", add: "アーツ強度", skill: "付術" },
+            { type: "アーツユニット", name: "破壊ユニット", base: "メイン能力", add: "アーツ強度", skill: "噴発" },
+            { type: "アーツユニット", name: "蒼星の囁き", base: "知性", add: "回復効率", skill: "付術" },
+            { type: "アーツユニット", name: "騎士精神", base: "意志", add: "HP", skill: "治癒" },
+            { type: "アーツユニット", name: "使命必達", base: "意志", add: "必殺リチャージ", skill: "追襲" },
+            { type: "アーツユニット", name: "遺忘", base: "知性", add: "アーツダメージ", skill: "夜幕" },
+            { type: "アーツユニット", name: "作品：蝕跡", base: "意志", add: "自然ダメージ", skill: "圧制" },
+            { type: "拳銃", name: "芸術の独裁者", base: "知性", add: "会心率", skill: "切骨" },
+            { type: "拳銃", name: "ナビゲーター", base: "知性", add: "寒冷ダメージ", skill: "付術" },
+            { type: "拳銃", name: "楔", base: "メイン能力", add: "会心率", skill: "付術" },
+            { type: "拳銃", name: "同類共食", base: "メイン能力", add: "アーツダメージ", skill: "付術" },
+            { type: "両手剣", name: "大雷斑", base: "筋力", add: "HP", skill: "治癒" },
+            { type: "両手剣", name: "グラヴェンガー", base: "筋力", add: "攻撃力", skill: "噴発" },
+            { type: "両手剣", name: "鑑", base: "メイン能力", add: "攻撃力", skill: "圧制" },
+            { type: "両手剣", name: "昔日の逸品", base: "意志", add: "HP", skill: "効率" },
+            { type: "両手剣", name: "破砕君王", base: "筋力", add: "会心率", skill: "破砕" },
+            { type: "長柄武器", name: "負山", base: "敏捷", add: "物理ダメージ", skill: "効率" },
+            { type: "長柄武器", name: "勇猛", base: "敏捷", add: "物理ダメージ", skill: "巧技" },
+            { type: "長柄武器", name: "J.E.T.", base: "メイン能力", add: "攻撃力", skill: "圧制" }
+        ];
+
+        // ドロップエリアデータ
+        const dropData = {
+            "中枢エリア": {
+                base: ["敏捷", "筋力", "意志", "知性", "メイン能力"],
+                add: ["攻撃力", "灼熱ダメージ", "電磁ダメージ", "寒冷ダメージ", "自然ダメージ", "アーツ強度", "必殺リチャージ", "アーツダメージ"],
+                skill: ["強攻", "圧制", "追襲", "破砕", "巧技", "噴発", "流回", "効率"]
+            },
+            "源石研究パーク": {
+                base: ["敏捷", "筋力", "意志", "知性", "メイン能力"],
+                add: ["攻撃力", "灼熱ダメージ", "電磁ダメージ", "寒冷ダメージ", "自然ダメージ", "会心率", "必殺リチャージ", "アーツダメージ"],
+                skill: ["圧制", "追襲", "昂揚", "巧技", "付術", "治癒", "切骨", "効率"]
+            },
+            "鉱山エリア": {
+                base: ["敏捷", "筋力", "意志", "知性", "メイン能力"],
+                add: ["HP", "物理ダメージ", "灼熱ダメージ", "寒冷ダメージ", "自然ダメージ", "会心率", "アーツ強度", "回復効率"],
+                skill: ["強攻", "圧制", "巧技", "残虐", "付術", "噴発", "夜幕", "効率"]
+            },
+            "エネルギー高地": {
+                base: ["敏捷", "筋力", "意志", "知性", "メイン能力"],
+                add: ["攻撃力", "HP", "物理ダメージ", "灼熱ダメージ", "自然ダメージ", "会心率", "アーツ強度", "回復効率"],
+                skill: ["追襲", "破砕", "昂揚", "残虐", "付術", "治癒", "切骨", "流回"]
+            },
+            "武陵城": {
+                base: ["敏捷", "筋力", "意志", "知性", "メイン能力"],
+                add: ["攻撃力", "HP", "電磁ダメージ", "寒冷ダメージ", "会心率", "必殺リチャージ", "アーツダメージ", "回復効率"],
+                skill: ["強攻", "破砕", "残虐", "治癒", "切骨", "噴発", "夜幕", "流回"]
+            }
+        };
+
+        // LocalStorageからステータスを読み込み
+        function loadStatus() {
+            const saved = localStorage.getItem('substrateStatus');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+            // デフォルトは全て未入手
+            const status = {};
+            weaponData.forEach(weapon => {
+                status[weapon.name] = 'not-obtained';
+            });
+            return status;
+        }
+
+        // LocalStorageにステータスを保存
+        function saveStatus(status) {
+            localStorage.setItem('substrateStatus', JSON.stringify(status));
+        }
+
+        let weaponStatus = loadStatus();
+
+        // ステータス変更
+        function changeStatus(weaponName, newStatus) {
+            weaponStatus[weaponName] = newStatus;
+            saveStatus(weaponStatus);
+            renderWeaponGrid();
+            renderFarmingAreas();
+        }
+
+        // 武器グリッドの描画
+        function renderWeaponGrid() {
+            const grid = document.getElementById('weaponGrid');
+            const searchTerm = document.getElementById('searchWeapon').value.toLowerCase();
+            
+            const filteredWeapons = weaponData.filter(weapon => 
+                weapon.name.toLowerCase().includes(searchTerm) ||
+                weapon.type.toLowerCase().includes(searchTerm)
+            );
+
+            grid.innerHTML = filteredWeapons.map(weapon => {
+                const status = weaponStatus[weapon.name] || 'not-obtained';
+                return `
+                    <div class="weapon-card">
+                        <div class="weapon-header">
+                            <div class="weapon-name">${weapon.name}</div>
+                            <div class="weapon-type">${weapon.type}</div>
+                        </div>
+                        <div class="weapon-effects">
+                            <div class="effect-row">
+                                <span class="effect-label">基礎効果:</span>
+                                <span class="effect-value">${weapon.base}</span>
+                            </div>
+                            <div class="effect-row">
+                                <span class="effect-label">付加効果:</span>
+                                <span class="effect-value">${weapon.add}</span>
+                            </div>
+                            <div class="effect-row">
+                                <span class="effect-label">スキル:</span>
+                                <span class="effect-value">${weapon.skill}</span>
+                            </div>
+                        </div>
+                        <div class="status-buttons">
+                            <button class="status-btn not-obtained ${status === 'not-obtained' ? 'active' : ''}" 
+                                    onclick="changeStatus('${weapon.name}', 'not-obtained')">
+                                未入手
+                            </button>
+                            <button class="status-btn farming ${status === 'farming' ? 'active' : ''}" 
+                                    onclick="changeStatus('${weapon.name}', 'farming')">
+                                厳選中
+                            </button>
+                            <button class="status-btn obtained ${status === 'obtained' ? 'active' : ''}" 
+                                    onclick="changeStatus('${weapon.name}', 'obtained')">
+                                入手済
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 武器検索フィルター
+        function filterWeapons() {
+            renderWeaponGrid();
+        }
+
+        // 基質が指定エリアでドロップするかチェック
+        function canDropInArea(weapon, areaName) {
+            const area = dropData[areaName];
+            return area.base.includes(weapon.base) &&
+                   area.add.includes(weapon.add) &&
+                   area.skill.includes(weapon.skill);
+        }
+
+        // 厳選エリアの描画
+        function renderFarmingAreas() {
+            const container = document.getElementById('farmingAreas');
+            const farmingWeapons = weaponData.filter(w => weaponStatus[w.name] === 'farming');
+
+            if (farmingWeapons.length === 0) {
+                container.innerHTML = '<div class="no-substrates">厳選中の基質がありません。「所持基質」タブで厳選中に設定してください。</div>';
+                return;
+            }
+
+            container.innerHTML = Object.keys(dropData).map(areaName => {
+                const availableWeapons = farmingWeapons.filter(weapon => 
+                    canDropInArea(weapon, areaName)
+                );
+
+                return `
+                    <div class="area-section">
+                        <div class="area-header">${areaName}</div>
+                        <div class="area-content">
+                            ${availableWeapons.length > 0 ? `
+                                <div class="substrate-list">
+                                    ${availableWeapons.map(weapon => `
+                                        <div class="substrate-item">
+                                            <div class="substrate-weapon">${weapon.name} (${weapon.type})</div>
+                                            <div class="substrate-effects">
+                                                基礎: ${weapon.base}<br>
+                                                付加: ${weapon.add}<br>
+                                                スキル: ${weapon.skill}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : `
+                                <div class="no-substrates">このエリアでドロップする厳選中の基質はありません</div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 武器データテーブルの描画
+        function renderWeaponTable() {
+            const table = document.getElementById('weaponTable');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>種類</th>
+                        <th>名前</th>
+                        <th>基礎効果</th>
+                        <th>付加効果</th>
+                        <th>スキル効果</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${weaponData.map(weapon => `
+                        <tr>
+                            <td>${weapon.type}</td>
+                            <td><strong>${weapon.name}</strong></td>
+                            <td>${weapon.base}</td>
+                            <td>${weapon.add}</td>
+                            <td>${weapon.skill}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+        }
+
+        // ドロップデータの描画
+        function renderDropData() {
+            const container = document.getElementById('dropData');
+            container.innerHTML = Object.entries(dropData).map(([areaName, data]) => `
+                <div class="area-section">
+                    <div class="area-header">${areaName}</div>
+                    <div class="area-content">
+                        <p><strong>基礎効果:</strong></p>
+                        <div style="margin-bottom: 15px;">
+                            ${data.base.map(effect => `<span class="effect-badge">${effect}</span>`).join('')}
+                        </div>
+                        <p><strong>付加効果:</strong></p>
+                        <div style="margin-bottom: 15px;">
+                            ${data.add.map(effect => `<span class="effect-badge">${effect}</span>`).join('')}
+                        </div>
+                        <p><strong>スキル効果:</strong></p>
+                        <div>
+                            ${data.skill.map(effect => `<span class="effect-badge">${effect}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // タブ切り替え
+        function switchTab(tabName) {
+            // タブボタンの更新
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // タブコンテンツの更新
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+
+            // タブに応じた描画
+            if (tabName === 'farming') {
+                renderFarmingAreas();
+            }
+        }
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderWeaponGrid();
+            renderFarmingAreas();
+            renderWeaponTable();
+            renderDropData();
+        });
+    </script>
+</body>
+</html>
