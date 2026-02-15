@@ -179,11 +179,23 @@
             color: #999;
         }
 
+        .status-btn.not-obtained.active {
+            background: #999;
+            color: white;
+            border-color: #999;
+        }
+
         .status-btn.farming {
             border-color: #ffa726;
             background: #fff3e0;
             color: #f57c00;
             font-weight: bold;
+        }
+
+        .status-btn.farming.active {
+            background: #f57c00;
+            color: white;
+            border-color: #f57c00;
         }
 
         .status-btn.obtained {
@@ -193,8 +205,13 @@
             font-weight: bold;
         }
 
+        .status-btn.obtained.active {
+            background: #2e7d32;
+            color: white;
+            border-color: #2e7d32;
+        }
+
         .status-btn.active {
-            transform: scale(1.05);
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
@@ -305,6 +322,63 @@
             outline: none;
             border-color: #FFFF00;
         }
+
+        .filter-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-reset {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            align-self: flex-end;
+        }
+
+        .filter-reset:hover {
+            background: #5568d3;
+        }
     </style>
 </head>
 <body>
@@ -324,6 +398,45 @@
         <div id="possession" class="tab-content active">
             <h2>所持基質管理</h2>
             <input type="text" class="search-box" id="searchWeapon" placeholder="武器名で検索..." onkeyup="filterWeapons()">
+            
+            <div class="filter-container">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">レア度</label>
+                        <select class="filter-select" id="filterRarity" onchange="filterWeapons()">
+                            <option value="">全て</option>
+                            <option value="6">☆6</option>
+                            <option value="5">☆5</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">種類</label>
+                        <select class="filter-select" id="filterType" onchange="filterWeapons()">
+                            <option value="">全て</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">基礎効果</label>
+                        <select class="filter-select" id="filterBase" onchange="filterWeapons()">
+                            <option value="">全て</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">付加効果</label>
+                        <select class="filter-select" id="filterAdd" onchange="filterWeapons()">
+                            <option value="">全て</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">スキル効果</label>
+                        <select class="filter-select" id="filterSkill" onchange="filterWeapons()">
+                            <option value="">全て</option>
+                        </select>
+                    </div>
+                    <button class="filter-reset" onclick="resetFilters()">リセット</button>
+                </div>
+            </div>
+            
             <div class="weapon-grid" id="weaponGrid"></div>
         </div>
 
@@ -335,6 +448,43 @@
 
         <div id="weapons" class="tab-content">
             <h2>武器データ</h2>
+            <div class="filter-container">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">レア度</label>
+                        <select class="filter-select" id="filterRarityWeaponData" onchange="renderWeaponTable()">
+                            <option value="">全て</option>
+                            <option value="6">☆6</option>
+                            <option value="5">☆5</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">種類</label>
+                        <select class="filter-select" id="filterTypeWeaponData" onchange="renderWeaponTable()">
+                            <option value="">全て</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">基礎効果</label>
+                        <select class="filter-select" id="filterBaseWeaponData" onchange="renderWeaponTable()">
+                            <option value="">全て</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">付加効果</label>
+                        <select class="filter-select" id="filterAddWeaponData" onchange="renderWeaponTable()">
+                            <option value="">全て</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">スキル効果</label>
+                        <select class="filter-select" id="filterSkillWeaponData" onchange="renderWeaponTable()">
+                            <option value="">全て</option>
+                        </select>
+                    </div>
+                    <button class="filter-reset" onclick="resetWeaponDataFilters()">リセット</button>
+                </div>
+            </div>
             <table class="data-table" id="weaponTable"></table>
         </div>
 
@@ -347,32 +497,53 @@
     <script>
         // 武器データ
         const weaponData = [
-            { type: "片手剣", name: "フレイムフォージ", base: "知性", add: "攻撃力", skill: "夜幕" },
-            { type: "片手剣", name: "大願", base: "敏捷", add: "攻撃力", skill: "付術" },
-            { type: "片手剣", name: "不知帰", base: "意志", add: "攻撃力", skill: "流回" },
-            { type: "片手剣", name: "テルミット・カッター", base: "意志", add: "攻撃力", skill: "流回" },
-            { type: "片手剣", name: "ダークトーチ", base: "知性", add: "灼熱ダメージ", skill: "付術" },
-            { type: "片手剣", name: "フーヤオ", base: "メイン能力", add: "会心率", skill: "夜幕" },
-            { type: "片手剣", name: "輝かしき名声", base: "メイン能力", add: "物理ダメージ", skill: "残虐" },
-            { type: "片手剣", name: "白夜新星", base: "メイン能力", add: "アーツ強度", skill: "付術" },
-            { type: "アーツユニット", name: "破壊ユニット", base: "メイン能力", add: "アーツ強度", skill: "噴発" },
-            { type: "アーツユニット", name: "蒼星の囁き", base: "知性", add: "回復効率", skill: "付術" },
-            { type: "アーツユニット", name: "騎士精神", base: "意志", add: "HP", skill: "治癒" },
-            { type: "アーツユニット", name: "使命必達", base: "意志", add: "必殺リチャージ", skill: "追襲" },
-            { type: "アーツユニット", name: "遺忘", base: "知性", add: "アーツダメージ", skill: "夜幕" },
-            { type: "アーツユニット", name: "作品：蝕跡", base: "意志", add: "自然ダメージ", skill: "圧制" },
-            { type: "拳銃", name: "芸術の独裁者", base: "知性", add: "会心率", skill: "切骨" },
-            { type: "拳銃", name: "ナビゲーター", base: "知性", add: "寒冷ダメージ", skill: "付術" },
-            { type: "拳銃", name: "楔", base: "メイン能力", add: "会心率", skill: "付術" },
-            { type: "拳銃", name: "同類共食", base: "メイン能力", add: "アーツダメージ", skill: "付術" },
-            { type: "両手剣", name: "大雷斑", base: "筋力", add: "HP", skill: "治癒" },
-            { type: "両手剣", name: "グラヴェンガー", base: "筋力", add: "攻撃力", skill: "噴発" },
-            { type: "両手剣", name: "鑑", base: "メイン能力", add: "攻撃力", skill: "圧制" },
-            { type: "両手剣", name: "昔日の逸品", base: "意志", add: "HP", skill: "効率" },
-            { type: "両手剣", name: "破砕君王", base: "筋力", add: "会心率", skill: "破砕" },
-            { type: "長柄武器", name: "負山", base: "敏捷", add: "物理ダメージ", skill: "効率" },
-            { type: "長柄武器", name: "勇猛", base: "敏捷", add: "物理ダメージ", skill: "巧技" },
-            { type: "長柄武器", name: "J.E.T.", base: "メイン能力", add: "攻撃力", skill: "圧制" }
+            { rarity: 6, type: "片手剣", name: "フレイムフォージ", base: "知性", add: "攻撃力", skill: "夜幕" },
+            { rarity: 6, type: "片手剣", name: "大願", base: "敏捷", add: "攻撃力", skill: "付術" },
+            { rarity: 6, type: "片手剣", name: "不知帰", base: "意志", add: "攻撃力", skill: "流回" },
+            { rarity: 6, type: "片手剣", name: "テルミット・カッター", base: "意志", add: "攻撃力", skill: "流回" },
+            { rarity: 6, type: "片手剣", name: "ダークトーチ", base: "知性", add: "灼熱ダメージ", skill: "付術" },
+            { rarity: 6, type: "片手剣", name: "フーヤオ", base: "メイン能力", add: "会心率", skill: "夜幕" },
+            { rarity: 6, type: "片手剣", name: "輝かしき名声", base: "メイン能力", add: "物理ダメージ", skill: "残虐" },
+            { rarity: 6, type: "片手剣", name: "白夜新星", base: "メイン能力", add: "アーツ強度", skill: "付術" },
+            { rarity: 5, type: "片手剣", name: "鋼鉄余音", base: "敏捷", add: "物理ダメージ", skill: "巧技" },
+            { rarity: 5, type: "片手剣", name: "堅城鋳造者", base: "知性", add: "必殺リチャージ", skill: "昂揚" },
+            { rarity: 5, type: "片手剣", name: "フィンチェイサー3.0", base: "筋力", add: "寒冷ダメージ", skill: "圧制" },
+            { rarity: 5, type: "片手剣", name: "抑止", base: "敏捷", add: "物理ダメージ", skill: "夜幕" },
+            { rarity: 5, type: "片手剣", name: "十二問", base: "敏捷", add: "攻撃力", skill: "付術" },
+            { rarity: 5, type: "片手剣", name: "O.B.J.軽刃", base: "敏捷", add: "攻撃力", skill: "流回" },
+            { rarity: 6, type: "アーツユニット", name: "破壊ユニット", base: "メイン能力", add: "アーツ強度", skill: "噴発" },
+            { rarity: 6, type: "アーツユニット", name: "蒼星の囁き", base: "知性", add: "回復効率", skill: "付術" },
+            { rarity: 6, type: "アーツユニット", name: "騎士精神", base: "意志", add: "HP", skill: "治癒" },
+            { rarity: 6, type: "アーツユニット", name: "使命必達", base: "意志", add: "必殺リチャージ", skill: "追襲" },
+            { rarity: 6, type: "アーツユニット", name: "遺忘", base: "知性", add: "アーツダメージ", skill: "夜幕" },
+            { rarity: 6, type: "アーツユニット", name: "作品：蝕跡", base: "意志", add: "自然ダメージ", skill: "圧制" },
+            { rarity: 5, type: "アーツユニット", name: "弔いの詩", base: "知性", add: "攻撃力", skill: "夜幕" },
+            { rarity: 5, type: "アーツユニット", name: "術無", base: "意志", add: "必殺リチャージ", skill: "昂揚" },
+            { rarity: 5, type: "アーツユニット", name: "荒野迷走", base: "知性", add: "電磁ダメージ", skill: "付術" },
+            { rarity: 5, type: "アーツユニット", name: "布教の自由", base: "意志", add: "回復効率", skill: "治癒" },
+            { rarity: 5, type: "アーツユニット", name: "O.B.J.術識", base: "知性", add: "アーツ強度", skill: "追襲" },
+            { rarity: 6, type: "拳銃", name: "芸術の独裁者", base: "知性", add: "会心率", skill: "切骨" },
+            { rarity: 6, type: "拳銃", name: "ナビゲーター", base: "知性", add: "寒冷ダメージ", skill: "付術" },
+            { rarity: 6, type: "拳銃", name: "楔", base: "メイン能力", add: "会心率", skill: "付術" },
+            { rarity: 6, type: "拳銃", name: "同類共食", base: "メイン能力", add: "アーツダメージ", skill: "付術" },
+            { rarity: 5, type: "拳銃", name: "作品：衆生", base: "敏捷", add: "アーツダメージ", skill: "付術" },
+            { rarity: 5, type: "拳銃", name: "O.B.J.迅速", base: "敏捷", add: "必殺リチャージ", skill: "噴発" },
+            { rarity: 5, type: "拳銃", name: "合理的決別", base: "筋力", add: "灼熱ダメージ", skill: "追襲" },
+            { rarity: 6, type: "両手剣", name: "大雷斑", base: "筋力", add: "HP", skill: "治癒" },
+            { rarity: 6, type: "両手剣", name: "グラヴェンガー", base: "筋力", add: "攻撃力", skill: "噴発" },
+            { rarity: 6, type: "両手剣", name: "鑑", base: "メイン能力", add: "攻撃力", skill: "圧制" },
+            { rarity: 6, type: "両手剣", name: "昔日の逸品", base: "意志", add: "HP", skill: "効率" },
+            { rarity: 6, type: "両手剣", name: "破砕君王", base: "筋力", add: "会心率", skill: "破砕" },
+            { rarity: 5, type: "両手剣", name: "探龍", base: "筋力", add: "必殺リチャージ", skill: "噴発" },
+            { rarity: 5, type: "両手剣", name: "千古恒常", base: "筋力", add: "アーツ強度", skill: "残虐" },
+            { rarity: 5, type: "両手剣", name: "最期の声", base: "筋力", add: "HP", skill: "治癒" },
+            { rarity: 5, type: "両手剣", name: "O.B.J.重責", base: "筋力", add: "HP", skill: "効率" },
+            { rarity: 6, type: "長柄武器", name: "負山", base: "敏捷", add: "物理ダメージ", skill: "効率" },
+            { rarity: 6, type: "長柄武器", name: "勇猛", base: "敏捷", add: "物理ダメージ", skill: "巧技" },
+            { rarity: 6, type: "長柄武器", name: "J.E.T.", base: "メイン能力", add: "攻撃力", skill: "圧制" },
+            { rarity: 5, type: "長柄武器", name: "正義嵌合", base: "筋力", add: "必殺リチャージ", skill: "残虐" },
+            { rarity: 5, type: "長柄武器", name: "O.B.J.鋭矛", base: "意志", add: "物理ダメージ", skill: "付術" },
+            { rarity: 5, type: "長柄武器", name: "求心の槍", base: "意志", add: "電磁ダメージ", skill: "圧制" }
         ];
 
         // ドロップエリアデータ
@@ -437,18 +608,30 @@
         function renderWeaponGrid() {
             const grid = document.getElementById('weaponGrid');
             const searchTerm = document.getElementById('searchWeapon').value.toLowerCase();
+            const filterRarity = document.getElementById('filterRarity').value;
+            const filterType = document.getElementById('filterType').value;
+            const filterBase = document.getElementById('filterBase').value;
+            const filterAdd = document.getElementById('filterAdd').value;
+            const filterSkill = document.getElementById('filterSkill').value;
             
-            const filteredWeapons = weaponData.filter(weapon => 
-                weapon.name.toLowerCase().includes(searchTerm) ||
-                weapon.type.toLowerCase().includes(searchTerm)
-            );
+            const filteredWeapons = weaponData.filter(weapon => {
+                const matchSearch = weapon.name.toLowerCase().includes(searchTerm) ||
+                                  weapon.type.toLowerCase().includes(searchTerm);
+                const matchRarity = !filterRarity || weapon.rarity.toString() === filterRarity;
+                const matchType = !filterType || weapon.type === filterType;
+                const matchBase = !filterBase || weapon.base === filterBase;
+                const matchAdd = !filterAdd || weapon.add === filterAdd;
+                const matchSkill = !filterSkill || weapon.skill === filterSkill;
+                
+                return matchSearch && matchRarity && matchType && matchBase && matchAdd && matchSkill;
+            });
 
             grid.innerHTML = filteredWeapons.map(weapon => {
                 const status = weaponStatus[weapon.name] || 'not-obtained';
                 return `
                     <div class="weapon-card">
                         <div class="weapon-header">
-                            <div class="weapon-name">${weapon.name}</div>
+                            <div class="weapon-name">${weapon.name} ☆${weapon.rarity}</div>
                             <div class="weapon-type">${weapon.type}</div>
                         </div>
                         <div class="weapon-effects">
@@ -534,9 +717,26 @@
         // 武器データテーブルの描画
         function renderWeaponTable() {
             const table = document.getElementById('weaponTable');
+            const filterRarity = document.getElementById('filterRarityWeaponData').value;
+            const filterType = document.getElementById('filterTypeWeaponData').value;
+            const filterBase = document.getElementById('filterBaseWeaponData').value;
+            const filterAdd = document.getElementById('filterAddWeaponData').value;
+            const filterSkill = document.getElementById('filterSkillWeaponData').value;
+            
+            const filteredWeapons = weaponData.filter(weapon => {
+                const matchRarity = !filterRarity || weapon.rarity.toString() === filterRarity;
+                const matchType = !filterType || weapon.type === filterType;
+                const matchBase = !filterBase || weapon.base === filterBase;
+                const matchAdd = !filterAdd || weapon.add === filterAdd;
+                const matchSkill = !filterSkill || weapon.skill === filterSkill;
+                
+                return matchRarity && matchType && matchBase && matchAdd && matchSkill;
+            });
+            
             table.innerHTML = `
                 <thead>
                     <tr>
+                        <th>レア度</th>
                         <th>種類</th>
                         <th>名前</th>
                         <th>基礎効果</th>
@@ -545,8 +745,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    ${weaponData.map(weapon => `
+                    ${filteredWeapons.map(weapon => `
                         <tr>
+                            <td>☆${weapon.rarity}</td>
                             <td>${weapon.type}</td>
                             <td><strong>${weapon.name}</strong></td>
                             <td>${weapon.base}</td>
@@ -600,11 +801,64 @@
 
         // 初期化
         document.addEventListener('DOMContentLoaded', function() {
+            initializeFilters();
             renderWeaponGrid();
             renderFarmingAreas();
             renderWeaponTable();
             renderDropData();
         });
+
+        // フィルター選択肢の初期化
+        function initializeFilters() {
+            // 所持基質タブのフィルター
+            const types = [...new Set(weaponData.map(w => w.type))].sort();
+            const bases = [...new Set(weaponData.map(w => w.base))].sort();
+            const adds = [...new Set(weaponData.map(w => w.add))].sort();
+            const skills = [...new Set(weaponData.map(w => w.skill))].sort();
+
+            populateSelect('filterType', types);
+            populateSelect('filterBase', bases);
+            populateSelect('filterAdd', adds);
+            populateSelect('filterSkill', skills);
+
+            // 武器データタブのフィルター
+            populateSelect('filterTypeWeaponData', types);
+            populateSelect('filterBaseWeaponData', bases);
+            populateSelect('filterAddWeaponData', adds);
+            populateSelect('filterSkillWeaponData', skills);
+        }
+
+        // セレクトボックスにオプションを追加
+        function populateSelect(selectId, options) {
+            const select = document.getElementById(selectId);
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                select.appendChild(optionElement);
+            });
+        }
+
+        // 所持基質タブのフィルターをリセット
+        function resetFilters() {
+            document.getElementById('searchWeapon').value = '';
+            document.getElementById('filterRarity').value = '';
+            document.getElementById('filterType').value = '';
+            document.getElementById('filterBase').value = '';
+            document.getElementById('filterAdd').value = '';
+            document.getElementById('filterSkill').value = '';
+            renderWeaponGrid();
+        }
+
+        // 武器データタブのフィルターをリセット
+        function resetWeaponDataFilters() {
+            document.getElementById('filterRarityWeaponData').value = '';
+            document.getElementById('filterTypeWeaponData').value = '';
+            document.getElementById('filterBaseWeaponData').value = '';
+            document.getElementById('filterAddWeaponData').value = '';
+            document.getElementById('filterSkillWeaponData').value = '';
+            renderWeaponTable();
+        }
     </script>
 </body>
 </html>
